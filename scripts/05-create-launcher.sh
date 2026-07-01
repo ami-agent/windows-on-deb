@@ -124,22 +124,79 @@ exec "\$GE_PROTON_DIR/proton" run "\$D2R_EXE_PATH"
 SCRIPTEOF
 chmod +x "$DIRECT_SCRIPT"
 
+# Extract icon from D2R.exe
+ICON_DIR="$HOME/.local/share/icons/hicolor/256x256/apps"
+ICON_PATH="$ICON_DIR/d2r.png"
+mkdir -p "$ICON_DIR"
+
+D2R_EXE="$BNET_PREFIX/pfx/drive_c/Program Files (x86)/Diablo II Resurrected/D2R.exe"
+if [ -f "$D2R_EXE" ] && command -v wrestool &>/dev/null && command -v icotool &>/dev/null; then
+    echo "Extracting icon from D2R.exe..."
+    wrestool -x -t 14 "$D2R_EXE" 2>/dev/null | icotool -x --width=256 --height=256 -o "$ICON_DIR" - 2>/dev/null || true
+    # Rename extracted png if found
+    EXTRACTED_PNG=$(ls "$ICON_DIR"/*.png 2>/dev/null | head -1)
+    if [ -n "$EXTRACTED_PNG" ]; then
+        mv "$EXTRACTED_PNG" "$ICON_PATH" 2>/dev/null || true
+    fi
+elif [ -f "$BNET_PREFIX/pfx/drive_c/Program Files (x86)/Battle.net/Battle.net.exe" ] && command -v wrestool &>/dev/null; then
+    echo "Extracting icon from Battle.net.exe..."
+    wrestool -x -t 14 "$BNET_PREFIX/pfx/drive_c/Program Files (x86)/Battle.net/Battle.net.exe" 2>/dev/null | icotool -x --width=256 --height=256 -o "$ICON_DIR" - 2>/dev/null || true
+    EXTRACTED_PNG=$(ls "$ICON_DIR"/*.png 2>/dev/null | head -1)
+    if [ -n "$EXTRACTED_PNG" ]; then
+        mv "$EXTRACTED_PNG" "$ICON_PATH" 2>/dev/null || true
+    fi
+fi
+# Fallback: use Steam icon if nothing extracted
+if [ ! -f "$ICON_PATH" ]; then
+    if [ -f "$HOME/.steam/steam/steam.png" ]; then
+        cp "$HOME/.steam/steam/steam.png" "$ICON_PATH"
+    fi
+fi
+
+# Use the Arc workaround launcher if it exists (it includes GPU fixes + render ACL)
+FINAL_LAUNCHER="$LAUNCH_SCRIPT"
+if [ -f "$GAMES_DIR/launch-d2r-arc.sh" ]; then
+    FINAL_LAUNCHER="$GAMES_DIR/launch-d2r-arc.sh"
+fi
+
 # Desktop entry
+DESKTOP_FILE="$HOME/.local/share/applications/d2r.desktop"
 mkdir -p "$HOME/.local/share/applications"
-cat > "$HOME/.local/share/applications/d2r.desktop" << DESKTOPDF
+cat > "$DESKTOP_FILE" << DESKTOPDF
 [Desktop Entry]
 Name=Diablo II: Resurrected
 Comment=Launch D2R via Battle.net (GE-Proton)
-Exec=$LAUNCH_SCRIPT
+Exec=$FINAL_LAUNCHER
+Icon=$ICON_PATH
 Terminal=false
 Type=Application
-Categories=Game;
+Categories=Game;ActionGame;
+StartupNotify=true
+StartupWMClass=D2R.exe
+Actions=launch-bnet;
+
+[Desktop Action launch-bnet]
+Name=Launch Battle.net Launcher
+Exec=$GAMES_DIR/launch-d2r.sh
 DESKTOPDF
+
+# Copy to ~/Desktop for desktop icon (GNOME)
+if [ -d "$HOME/Desktop" ]; then
+    cp "$DESKTOP_FILE" "$HOME/Desktop/d2r.desktop"
+    chmod +x "$HOME/Desktop/d2r.desktop"
+    echo "  ~/Desktop/d2r.desktop"
+fi
+
+# Register with desktop database
+if command -v update-desktop-database &>/dev/null; then
+    update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
+fi
 
 echo "=== [05] Created ==="
 echo "  $LAUNCH_SCRIPT        — Launch D2R via Battle.net"
 echo "  $DIRECT_SCRIPT        — Launch D2R.exe directly (edit D2R_EXE_PATH)"
-echo "  ~/.local/share/applications/d2r.desktop"
+echo "  $DESKTOP_FILE"
+echo "  Icon: $ICON_PATH"
 echo ""
 echo "If D2R fails on Intel Arc (black screen/crash), run:"
 echo "  06-apply-arc-workarounds.sh"

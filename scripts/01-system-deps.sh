@@ -25,7 +25,8 @@ sudo apt install -y \
     vulkan-tools \
     acl \
     curl \
-    wget
+    wget \
+    icoutils
 
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
