@@ -25,12 +25,7 @@ Run in order:
 | 3 | `03-install-proton.sh` | GE-Proton (downloaded into Steam's compatibilitytools.d) | No |
 | 4 | `04-install-battlenet.sh` | Battle.net launcher under GE-Proton prefix | No |
 | 5 | `05-create-launcher.sh` | Launch scripts + desktop entry (applies to any installed game) | No |
-| 6 | *(obsolete)* | Intel Arc GPU workarounds — now baked into launcher scripts | — |
-| 7 | `07-dev-toolchain.sh` | d2r-trainer (Linux memory trainer) + dev tools | Partial |
-| 8 | *(obsolete)* | Render fix — now handled by launcher scripts at each launch | — |
-
-**Scripts 06 and 08 have been removed.** Their logic (GPU spoofing via dxvk.conf,
-ACL on /dev/dri/render\*, Win10 registry) is baked directly into the launcher scripts.
+| 6 | `07-dev-toolchain.sh` | d2r-trainer (Linux memory trainer) + dev tools | Partial |
 
 ## Quick Start
 
