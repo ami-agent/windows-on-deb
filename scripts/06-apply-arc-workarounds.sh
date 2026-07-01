@@ -90,9 +90,6 @@ if [ ! -f "\$BNET_LAUNCHER" ]; then
     exit 1
 fi
 
-# Kill leftover processes from previous runs
-killall -9 D2R.exe Battle.net.exe Agent.exe wineserver 2>/dev/null || true
-
 # Ensure Vulkan render node access
 for dev in /dev/dri/render*; do
     if [ -e "\$dev" ] && [ ! -r "\$dev" ]; then
