@@ -24,8 +24,8 @@ Run in order:
 | 2 | `02-install-steam.sh` | Steam + Steam runtime | Yes |
 | 3 | `03-install-proton.sh` | GE-Proton (downloaded into Steam's compatibilitytools.d) | No |
 | 4 | `04-install-battlenet.sh` | Battle.net launcher under GE-Proton prefix | No |
-| 5 | `05-create-launcher.sh` | Launch scripts + desktop entry (applies to any installed game) | No |
-| 6 | `07-dev-toolchain.sh` | d2r-trainer (Linux memory trainer) + dev tools | Partial |
+| 5 | `05-create-launcher-example.sh` | Launch scripts + desktop entry (applies to any installed game) | No |
+| 6 | `06-dev-toolchain-example.sh` | d2r-trainer (Linux memory trainer) + dev tools | Partial |
 
 ## Quick Start
 
@@ -38,8 +38,8 @@ chmod +x *.sh
 ./03-install-proton.sh
 ./04-install-battlenet.sh
 # Install D2R through Battle.net, then:
-./05-create-launcher.sh
-./07-dev-toolchain.sh
+./05-create-launcher-example.sh
+./06-dev-toolchain-example.sh
 ```
 
 Output lands in `~/Games/`:

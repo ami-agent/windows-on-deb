@@ -63,4 +63,4 @@ WINESERVER="$GE_PROTON_DIR/files/bin/wineserver" \
 echo ""
 echo "=== [04] Complete ==="
 echo "After D2R finishes installing through Battle.net, run:"
-echo "  05-create-launcher.sh"
+echo "  05-create-launcher-example.sh"

@@ -8,8 +8,8 @@ scripts/                        # numbered = dependency order
 ├── 02-install-steam.sh         # Steam apt install
 ├── 03-install-proton.sh        # GE-Proton download + extract
 ├── 04-install-battlenet.sh     # Battle.net installer via Proton
-├── 05-create-launcher.sh       # launch scripts + .desktop
-├── 07-dev-toolchain.sh         # d2r-trainer build
+├── 05-create-launcher-example.sh       # launch scripts + .desktop
+├── 06-dev-toolchain-example.sh         # d2r-trainer build
 └── config.env                  # shared paths sourced by every script
 ```
 
@@ -81,7 +81,7 @@ Battle.net auth is stored across three locations inside the prefix:
 2. **CachedData.db** (SQLite) — `login_cache` table: battle tag, account ID,
    connected regions.
 3. **Battle.net.config** (JSON) — `RememberAccountName` flag (set to `true`
-   by `05-create-launcher.sh`).
+   by `05-create-launcher-example.sh`).
 
 **Why login was lost before the fix:**
 `killall -9 ... wineserver` (SIGKILL) terminates the Wine server without
@@ -153,12 +153,12 @@ Creates prefix via `STEAM_COMPAT_DATA_PATH` + `proton run`, downloads
 Battle.net-Setup.exe with `wget`, installs via `proton run`. Sets
 Windows version to 10 in the registry.
 
-**05-create-launcher.sh**
+**05-create-launcher-example.sh**
 Generates three launcher scripts + desktop entry. Sets
 `RememberAccountName=true` in `Battle.net.config` via Python `json` module.
 Extracts D2R icon for desktop use.
 
-**07-dev-toolchain.sh**
+**06-dev-toolchain-example.sh**
 Clones and builds d2r-trainer. Requires `libc6-dev-i386` for 32-bit cross
 compilation. Installs Python dependencies for cheat-engine-like memory
 scanning.
