@@ -125,35 +125,40 @@ SCRIPTEOF
 chmod +x "$DIRECT_SCRIPT"
 
 # Extract icon from D2R.exe
-ICON_DIR="$HOME/.local/share/icons/hicolor/256x256/apps"
-ICON_PATH="$ICON_DIR/d2r.png"
-mkdir -p "$ICON_DIR"
+ICON_BASE="$HOME/.local/share/icons/hicolor"
+mkdir -p "$ICON_BASE/256x256/apps" "$ICON_BASE/48x48/apps"
+TMP_ICO="/tmp/d2r-icon.ico"
+rm -f "$TMP_ICO"
 
 D2R_EXE="$BNET_PREFIX/pfx/drive_c/Program Files (x86)/Diablo II Resurrected/D2R.exe"
 if [ -f "$D2R_EXE" ] && command -v wrestool &>/dev/null && command -v icotool &>/dev/null; then
     echo "Extracting icon from D2R.exe..."
-    wrestool -x -t 14 "$D2R_EXE" 2>/dev/null | icotool -x --width=256 --height=256 -o "$ICON_DIR" - 2>/dev/null || true
-    # Rename extracted png if found
-    EXTRACTED_PNG=$(ls "$ICON_DIR"/*.png 2>/dev/null | head -1)
-    if [ -n "$EXTRACTED_PNG" ]; then
-        mv "$EXTRACTED_PNG" "$ICON_PATH" 2>/dev/null || true
+    wrestool -x -t 14 "$D2R_EXE" 2>/dev/null > "$TMP_ICO"
+    if [ -s "$TMP_ICO" ]; then
+        icotool -x --width=256 --height=256 -o "$ICON_BASE/256x256/apps" "$TMP_ICO" 2>/dev/null || true
+        icotool -x --width=48 --height=48 -o "$ICON_BASE/48x48/apps" "$TMP_ICO" 2>/dev/null || true
+        # Rename extracted pngs
+        for sz in 256 48; do
+            found=$(ls "$ICON_BASE/${sz}x${sz}/apps"/*.png 2>/dev/null | head -1)
+            if [ -n "$found" ]; then
+                mv "$found" "$ICON_BASE/${sz}x${sz}/apps/d2r.png" 2>/dev/null || true
+            fi
+        done
     fi
-elif [ -f "$BNET_PREFIX/pfx/drive_c/Program Files (x86)/Battle.net/Battle.net.exe" ] && command -v wrestool &>/dev/null; then
-    echo "Extracting icon from Battle.net.exe..."
-    wrestool -x -t 14 "$BNET_PREFIX/pfx/drive_c/Program Files (x86)/Battle.net/Battle.net.exe" 2>/dev/null | icotool -x --width=256 --height=256 -o "$ICON_DIR" - 2>/dev/null || true
-    EXTRACTED_PNG=$(ls "$ICON_DIR"/*.png 2>/dev/null | head -1)
-    if [ -n "$EXTRACTED_PNG" ]; then
-        mv "$EXTRACTED_PNG" "$ICON_PATH" 2>/dev/null || true
-    fi
-fi
-# Fallback: use Steam icon if nothing extracted
-if [ ! -f "$ICON_PATH" ]; then
-    if [ -f "$HOME/.steam/steam/steam.png" ]; then
-        cp "$HOME/.steam/steam/steam.png" "$ICON_PATH"
-    fi
+    rm -f "$TMP_ICO"
 fi
 
-# Use the Arc workaround launcher if it exists (it includes GPU fixes + render ACL)
+ICON_PATH="$ICON_BASE/256x256/apps/d2r.png"
+if [ ! -f "$ICON_PATH" ]; then
+    ICON_PATH=""
+fi
+
+# Update icon cache
+if command -v gtk-update-icon-cache &>/dev/null; then
+    gtk-update-icon-cache "$ICON_BASE" 2>/dev/null || true
+fi
+
+# Use the Arc workaround launcher if it exists
 FINAL_LAUNCHER="$LAUNCH_SCRIPT"
 if [ -f "$GAMES_DIR/launch-d2r-arc.sh" ]; then
     FINAL_LAUNCHER="$GAMES_DIR/launch-d2r-arc.sh"
@@ -167,7 +172,7 @@ cat > "$DESKTOP_FILE" << DESKTOPDF
 Name=Diablo II: Resurrected
 Comment=Launch D2R via Battle.net (GE-Proton)
 Exec=$FINAL_LAUNCHER
-Icon=$ICON_PATH
+Icon=${ICON_PATH:-applications-games}
 Terminal=false
 Type=Application
 Categories=Game;ActionGame;
@@ -180,11 +185,12 @@ Name=Launch Battle.net Launcher
 Exec=$GAMES_DIR/launch-d2r.sh
 DESKTOPDF
 
-# Copy to ~/Desktop for desktop icon (GNOME)
+# Copy to ~/Desktop for desktop icon (GNOME) and mark trusted
 if [ -d "$HOME/Desktop" ]; then
     cp "$DESKTOP_FILE" "$HOME/Desktop/d2r.desktop"
     chmod +x "$HOME/Desktop/d2r.desktop"
-    echo "  ~/Desktop/d2r.desktop"
+    gio set "$HOME/Desktop/d2r.desktop" metadata::trusted true 2>/dev/null || true
+    echo "  ~/Desktop/d2r.desktop (trusted)"
 fi
 
 # Register with desktop database
@@ -196,7 +202,7 @@ echo "=== [05] Created ==="
 echo "  $LAUNCH_SCRIPT        — Launch D2R via Battle.net"
 echo "  $DIRECT_SCRIPT        — Launch D2R.exe directly (edit D2R_EXE_PATH)"
 echo "  $DESKTOP_FILE"
-echo "  Icon: $ICON_PATH"
+if [ -n "$ICON_PATH" ]; then echo "  Icon: $ICON_PATH"; fi
 echo ""
 echo "If D2R fails on Intel Arc (black screen/crash), run:"
 echo "  06-apply-arc-workarounds.sh"
