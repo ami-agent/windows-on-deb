@@ -6,7 +6,13 @@ GE-Proton (with Wine), Battle.net launcher, and per-app runner scripts.
 Diablo II: Resurrected is the reference end-application; the pattern applies
 to any Windows game distributed through Battle.net, Steam, or standalone.
 
-Target: Ubuntu 24.04 / Intel Arc A770 / Mesa ANV / Wayland.
+Tested on:
+
+| Distro | GPU | Driver | Display Server | Stack Version | Status |
+|--------|-----|--------|----------------|---------------|--------|
+| Ubuntu 24.04 | Intel Arc A770 | Mesa ANV (24.0.x) | Wayland | GE-Proton11-1 | ✓ Full stack |
+| | | | | | |
+| | | | | | |
 
 ## Scripts
 
