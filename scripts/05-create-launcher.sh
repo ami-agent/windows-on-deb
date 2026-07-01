@@ -155,6 +155,21 @@ if command -v gtk-update-icon-cache &>/dev/null; then
     gtk-update-icon-cache "$ICON_BASE" 2>/dev/null || true
 fi
 
+# Enable RememberAccountName in Battle.net config for persistent login
+BNET_CONFIG="$BNET_PREFIX/pfx/drive_c/users/steamuser/AppData/Roaming/Battle.net/Battle.net.config"
+if [ -f "$BNET_CONFIG" ]; then
+    python3 -c "
+import json
+with open('$BNET_CONFIG', 'r') as f:
+    cfg = json.load(f)
+if cfg.get('Client', {}).get('RememberAccountName') != 'true':
+    cfg.setdefault('Client', {})['RememberAccountName'] = 'true'
+    with open('$BNET_CONFIG', 'w') as f:
+        json.dump(cfg, f, indent=4)
+    print('  Enabled RememberAccountName')
+" 2>/dev/null || true
+fi
+
 # Use the Arc workaround launcher if it exists
 FINAL_LAUNCHER="$LAUNCH_SCRIPT"
 if [ -f "$GAMES_DIR/launch-d2r-arc.sh" ]; then
